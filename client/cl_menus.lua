@@ -24,7 +24,7 @@ local function otherEmployees(job)
             local dutyIconColor = getDutyIconColor(activeEmployees[x].onDuty)
             menuOptions[#menuOptions+1] = {
                 title = activeEmployees[x].name,
-                description = dutyStr,
+                description = ('%s \n%s'):format(dutyStr, activeEmployees[x].clockInTime),
                 icon = dutyIcon,
                 iconColor = dutyIconColor,
             }

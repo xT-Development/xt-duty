@@ -22,15 +22,18 @@ lib.callback.register('xt-jobduty:server:getActiveEmployees', function(source, j
         if Bridge.hasGroup(playerSource, job) then
             local state = Player(playerSource).state
             local pName = Bridge.getCharName(playerSource)
+            local cid = Bridge.getCharId(playerSource)
             if not svConfig.HideOffDutyEmployees then
                 employees[#employees+1] = {
                     name = pName,
+                    clockInTime = onDutyTimes[cid] and ('Clocked In: %s'):format(os.date("%I:%M:%S %p", onDutyTimes[cid].time)) or '',
                     onDuty = state and state.onDuty or 0
                 }
             else
                 if state and state.onDuty == 1 then
                     employees[#employees+1] = {
                         name = pName,
+                        clockInTime = ('Clocked In: %s'):format(os.date("%I:%M:%S %p", onDutyTimes[cid].time)),
                         onDuty = state.onDuty
                     }
                 end
@@ -45,20 +48,34 @@ end)
 lib.callback.register('xt-jobduty:server:logDutyChange', function(source, info)
     local job, state = info.job, info.state
     local pName = Bridge.getCharName(source)
+    local cid = Bridge.getCharId(source)
     local dutyStr = getDutyStr(state)
     local logMessage = ''
     if state == 1 then
         logMessage = ('**Player:** %s \n**Status:** %s \n**On Duty Time:** %s'):format(pName, dutyStr, os.date("%I:%M:%S %p"))
-        onDutyTimes[source] = os.time()
+        onDutyTimes[cid] = { job = job, time = os.time() }
     elseif state == 0 then
-        if not onDutyTimes[source] then return true end
+        if not onDutyTimes[cid] then return true end
 
-        local onDutyTime = ('%.2f'):format(os.difftime(os.time(), onDutyTimes[source]) / 60)
-        logMessage = ('**Player:** %s \n**Status:** %s \n**Off Duty Time:** %s \n**On Duty Time:** %s \n**Total Time On Duty:** %s Minutes'):format(pName, dutyStr, os.date("%I:%M:%S %p"), os.date("%I:%M:%S %p", onDutyTimes[source]), onDutyTime)
-        onDutyTimes[source] = nil
+        local onDutyTime = ('%.2f'):format(os.difftime(os.time(), onDutyTimes[cid].time) / 60)
+        logMessage = ('**Player:** %s \n**Status:** %s \n**Off Duty Time:** %s \n**On Duty Time:** %s \n**Total Time On Duty:** %s Minutes'):format(pName, dutyStr, os.date("%I:%M:%S %p"), os.date("%I:%M:%S %p", onDutyTimes[cid].time), onDutyTime)
+        onDutyTimes[cid] = nil
     end
 
     sendDutyLog(job, logMessage)
 
     return true
+end)
+
+-- Logs Off Duty --
+AddEventHandler('Renewed-Lib:server:playerRemoved', function (source, player)
+    local src = source
+    local cid = Bridge.getCharId(src)
+    local pName = Bridge.getCharName(src)
+    if onDutyTimes and onDutyTimes[cid] then
+        local onDutyTime = ('%.2f'):format(os.difftime(os.time(), onDutyTimes[cid].time) / 60)
+        local logMessage = ('**Player:** %s \n**Status:** %s \n**Off Duty Time:** %s \n**On Duty Time:** %s \n**Total Time On Duty:** %s Minutes'):format(pName, dutyStr, os.date("%I:%M:%S %p"), os.date("%I:%M:%S %p", onDutyTimes[cid].time), onDutyTime)
+        sendDutyLog(onDutyTimes[cid].job, logMessage)
+        onDutyTimes[cid] = nil
+    end
 end)

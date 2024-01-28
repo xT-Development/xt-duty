@@ -22,6 +22,10 @@ local duty = Player(source).state.onDuty  -- Server
 
 -- Toggle Duty (Send Job as Data) --
 exports['xt-duty']:toggleDuty(job)        -- Client Only
+
+-- States
+[0] = Off Duty
+[1] = On Duty
 ```
 
 # Dependencies

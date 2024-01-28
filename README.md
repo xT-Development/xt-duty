@@ -11,7 +11,4 @@
 
 # Dependencies
 - ox_lib
-- ox_inventory
-- ox_target
-- oxmysql
 - Renewed-Lib

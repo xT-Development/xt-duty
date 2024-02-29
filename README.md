@@ -14,20 +14,8 @@
 - Logs player duty status changes
 - Logs total time on duty when player goes off duty
 
-# Usage
-```lua
--- Check Duty State --
-local duty = LocalPlayer.state.onDuty     -- Client
-local duty = Player(source).state.onDuty  -- Server
-
--- Toggle Duty (Send Job as Data) --
-exports['xt-duty']:toggleDuty(job)        -- Client Only
-
--- States
-[0] = Off Duty
-[1] = On Duty
-```
-
 # Dependencies
 - ox_lib
 - Renewed-Lib
+
+# [Docs](https://xtdev.gitbook.io/xt-docs/free-resources/duty-menu)

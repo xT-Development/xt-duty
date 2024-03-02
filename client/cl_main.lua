@@ -1,17 +1,14 @@
-Bridge = exports['Renewed-Lib']:getLib()
-local clConfig = require 'client.cl_config'
+local config = require 'configs.client'
 
 -- Checks if Players has Allowed Group / Job --
 function allowedJobCheck()
     local callback = nil
-    local groups = Bridge.getPlayerGroup()
+    local playerJob = getCharJob()
 
-    for _, allowedJob in pairs(clConfig.AllowedJobs) do
-        for job, level in pairs(groups) do
-            if allowedJob == job then
-                callback = job
-                break
-            end
+    for _, allowedJob in pairs(config.AllowedJobs) do
+        if allowedJob == playerJob then
+            callback = playerJob
+            break
         end
     end
 
@@ -21,13 +18,10 @@ end
 -- Toggle Player Duty --
 local function toggleDuty(job)
     local newState = (LocalPlayer.state.onDuty == 0) and 1 or 0
+    local dutyStr = getDutyStr(newState)
     LocalPlayer.state:set('onDuty', newState, true)
 
-    if newState == 1 then
-        lib.notify({ title = 'On Duty', type = 'success' })
-    else
-        lib.notify({ title = 'Off Duty', type = 'error' })
-    end
+    lib.notify({ title = dutyStr, type = 'info' })
 
     local dutyInfo = { job = job, state = newState }
     local sendLog = lib.callback.await('xt-jobduty:server:logDutyChange', false, dutyInfo)
@@ -41,7 +35,7 @@ local function initDutyState()
         return
     end
 
-    local cid = Bridge.getCharId()
+    local cid = getCharId()
     local kvpStr = ('onDuty-%s'):format(cid)
     local setState = GetResourceKvpInt(kvpStr) or 0
     LocalPlayer.state:set('onDuty', setState, true)
@@ -53,7 +47,7 @@ end
 
 -- Save State on Unload / Stop --
 local function saveDutyState()
-    local cid = Bridge.getCharId()
+    local cid = getCharId()
     local kvpStr = ('onDuty-%s'):format(cid)
     local hasAllowedJob = allowedJobCheck()
     if not hasAllowedJob then
@@ -66,11 +60,12 @@ local function saveDutyState()
 end
 
 -- Handlers --
-AddEventHandler('Renewed-Lib:client:PlayerLoaded', function(player) initDutyState() end)
-AddEventHandler('Renewed-Lib:client:PlayerUnloaded', function() saveDutyState() end)
+AddEventHandler('xt-duty:client:onLoad', function() initDutyState() end)
+AddEventHandler('xt-duty:client:onUnload', function() saveDutyState() end)
 
 AddEventHandler('onResourceStart', function(resource)
     if resource ~= GetCurrentResourceName() then return end
+    getPlayerData()
     initDutyState()
 end)
 

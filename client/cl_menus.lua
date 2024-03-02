@@ -1,4 +1,4 @@
-local Config = require 'client.cl_config'
+local Config = require 'configs.client'
 
 function getDutyStr(state)
     return (state == 1) and 'On Duty' or ' Off Duty'

@@ -1,5 +1,4 @@
-local Bridge = exports['Renewed-Lib']:getLib()
-local svConfig = require 'server.sv_config'
+local svConfig = require 'configs.server'
 local onDutyTimes = {}
 
 function getDutyStr(state)
@@ -19,10 +18,10 @@ lib.callback.register('xt-jobduty:server:getActiveEmployees', function(source, j
     local allPlayers = GetPlayers()
 
     for playerSource, _ in ipairs(allPlayers) do
-        if Bridge.hasGroup(playerSource, job) then
+        if hasGroup(playerSource, job) then
             local state = Player(playerSource).state
-            local pName = Bridge.getCharName(playerSource)
-            local cid = Bridge.getCharId(playerSource)
+            local pName = getCharName(playerSource)
+            local cid = getCharID(playerSource)
             if not svConfig.HideOffDutyEmployees then
                 employees[#employees+1] = {
                     name = pName,
@@ -47,8 +46,8 @@ end)
 -- Logs Duty Change --
 lib.callback.register('xt-jobduty:server:logDutyChange', function(source, info)
     local job, state = info.job, info.state
-    local pName = Bridge.getCharName(source)
-    local cid = Bridge.getCharId(source)
+    local pName = getCharName(source)
+    local cid = getCharID(source)
     local dutyStr = getDutyStr(state)
     local logMessage = ''
     if state == 1 then
@@ -70,8 +69,8 @@ end)
 -- Logs Off Duty --
 AddEventHandler('Renewed-Lib:server:playerRemoved', function (source, player)
     local src = source
-    local cid = Bridge.getCharId(src)
-    local pName = Bridge.getCharName(src)
+    local cid = getCharID(src)
+    local pName = getCharName(src)
     if onDutyTimes and onDutyTimes[cid] then
         local onDutyTime = ('%.2f'):format(os.difftime(os.time(), onDutyTimes[cid].time) / 60)
         local logMessage = ('**Player:** %s \n**Status:** %s \n**Off Duty Time:** %s \n**On Duty Time:** %s \n**Total Time On Duty:** %s Minutes'):format(pName, dutyStr, os.date("%I:%M:%S %p"), os.date("%I:%M:%S %p", onDutyTimes[cid].time), onDutyTime)

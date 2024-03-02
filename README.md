@@ -13,7 +13,7 @@
 - Option to hide off duty employees from the menu
 - Logs player duty status changes
 - Logs total time on duty when player goes off duty
-- - QB/QBX/ESX/OX/ND Bridge
+- QB/QBX/ESX/OX/ND Bridge
 
 # Dependencies
 - ox_lib

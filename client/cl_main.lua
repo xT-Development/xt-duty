@@ -5,10 +5,21 @@ function allowedJobCheck()
     local callback = nil
     local playerJob = getCharJob()
 
-    for _, allowedJob in pairs(config.AllowedJobs) do
-        if allowedJob == playerJob then
-            callback = playerJob
-            break
+    if type(playerJob) == 'table' then
+        for _, allowedJob in pairs(config.AllowedJobs) do
+            for jobName in pairs(playerJob) do
+                if allowedJob == jobName then
+                    callback = jobName
+                    break
+                end
+            end
+        end
+    else
+        for _, allowedJob in pairs(config.AllowedJobs) do
+            if allowedJob == playerJob then
+                callback = playerJob
+                break
+            end
         end
     end
 

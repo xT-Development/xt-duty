@@ -18,7 +18,7 @@ end
 
 function getPlayerJob(src)
     local player = getPlayer(src)
-    return player.job.name, player.job.grade
+    return player.job.name
 end
 
 function hasGroup(src, group)

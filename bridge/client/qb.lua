@@ -11,14 +11,14 @@ function getCharJob()
     return PlayerData.job.name
 end
 
-function getPlayerData()
+function initPlayerData()
     PlayerData = QBCore.Functions.GetPlayerData()
 end
 
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-    TriggerEvent('xt-repairs:client:onLoad')
+    TriggerEvent('xt-duty:client:onLoad')
 end)
 
 AddEventHandler('QBCore:Client:OnPlayerUnload', function()
-    TriggerEvent('xt-repairs:client:onUnload')
+    TriggerEvent('xt-duty:client:onUnload')
 end)

@@ -14,18 +14,18 @@ function getCharJob()
     return PlayerData.groups
 end
 
-function getPlayerData()
+function initPlayerData()
     PlayerData = NDCore.getPlayer()
 end
 
 AddEventHandler('ND:characterLoaded', function(character)
     PlayerData = character
 
-    TriggerEvent('xt-repairs:client:onLoad')
+    TriggerEvent('xt-duty:client:onLoad')
 end)
 
 AddEventHandler('ND:characterUnloaded', function()
     PlayerData = table.wipe(PlayerData)
 
-    TriggerEvent('xt-repairs:client:onUnload')
+    TriggerEvent('xt-duty:client:onUnload')
 end)

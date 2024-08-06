@@ -1,4 +1,5 @@
 local config = require 'configs.client'
+local playerState = LocalPlayer.state
 
 -- Checks if Players has Allowed Group / Job --
 function allowedJobCheck()
@@ -28,9 +29,9 @@ end
 
 -- Toggle Player Duty --
 local function toggleDuty(job)
-    local newState = (LocalPlayer.state.onDuty == 0) and 1 or 0
+    local newState = (playerState.onDuty == 0) and 1 or 0
     local dutyStr = getDutyStr(newState)
-    LocalPlayer.state:set('onDuty', newState, true)
+    playerState:set('onDuty', newState, true)
 
     lib.notify({ title = dutyStr, type = 'info' })
 
@@ -40,20 +41,22 @@ end exports('toggleDuty', toggleDuty)
 
 -- Set State on Load / Start --
 local function initDutyState()
+    initPlayerData()
+
     local hasAllowedJob = allowedJobCheck()
     if not hasAllowedJob then
-        LocalPlayer.state:set('onDuty', 0, true)
+        playerState:set('onDuty', 0, true)
         return
     end
 
     local cid = getCharId()
     local kvpStr = ('onDuty-%s'):format(cid)
     local setState = GetResourceKvpInt(kvpStr) or 0
-    LocalPlayer.state:set('onDuty', setState, true)
+    playerState:set('onDuty', setState, true)
 
     local dutyInfo = { job = hasAllowedJob, state = setState }
     local sendLog = lib.callback.await('xt-jobduty:server:logDutyChange', false, dutyInfo)
-    print(('Get Duty Status: %s'):format(LocalPlayer.state.onDuty))
+    lib.print.info('Get Duty Statuts', getDutyStr(playerState.onDuty))
 end
 
 -- Save State on Unload / Stop --
@@ -66,17 +69,23 @@ local function saveDutyState()
         return
     end
 
-    SetResourceKvpInt(kvpStr, LocalPlayer.state.onDuty)
-    print(('Save Duty Status: %s'):format(LocalPlayer.state.onDuty))
+    SetResourceKvpInt(kvpStr, playerState.onDuty)
+    lib.print.info('Save Duty Status', getDutyStr(playerState.onDuty))
 end
 
 -- Handlers --
-AddEventHandler('xt-duty:client:onLoad', function() initDutyState() end)
-AddEventHandler('xt-duty:client:onUnload', function() saveDutyState() end)
+AddEventHandler('xt-duty:client:onLoad', function()
+    Wait(100)
+    initDutyState()
+end)
+
+AddEventHandler('xt-duty:client:onUnload', function()
+    saveDutyState()
+end)
 
 AddEventHandler('onResourceStart', function(resource)
     if resource ~= GetCurrentResourceName() then return end
-    getPlayerData()
+    Wait(100)
     initDutyState()
 end)
 

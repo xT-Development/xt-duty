@@ -15,18 +15,18 @@ function getCharJob()
     return PlayerData.job.name, PlayerData.job.grade.level
 end
 
-function getPlayerData()
+function initPlayerData()
     PlayerData = Ox.GetPlayerData()
 end
 
 AddEventHandler('ox:playerLoaded', function()
     PlayerData = Ox.GetPlayerData()
 
-    TriggerEvent('xt-repairs:client:onLoad')
+    TriggerEvent('xt-duty:client:onLoad')
 end)
 
 AddEventHandler('ox:playerLogout', function()
     PlayerData = {}
 
-    TriggerEvent('xt-repairs:client:onUnload')
+    TriggerEvent('xt-duty:client:onUnload')
 end)

@@ -10,7 +10,7 @@ function getCharJob()
     return PlayerData.job.name
 end
 
-function getPlayerData()
+function initPlayerData()
     PlayerData = ESX.GetPlayerData()
 end
 

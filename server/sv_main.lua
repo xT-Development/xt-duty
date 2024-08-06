@@ -67,14 +67,15 @@ lib.callback.register('xt-jobduty:server:logDutyChange', function(source, info)
 end)
 
 -- Logs Off Duty --
-AddEventHandler('Renewed-Lib:server:playerRemoved', function (source, player)
+AddEventHandler('playerDropped', function (reason)
     local src = source
     local cid = getCharID(src)
     local pName = getCharName(src)
     if onDutyTimes and onDutyTimes[cid] then
         local onDutyTime = ('%.2f'):format(os.difftime(os.time(), onDutyTimes[cid].time) / 60)
-        local logMessage = ('**Player:** %s \n**Status:** %s \n**Off Duty Time:** %s \n**On Duty Time:** %s \n**Total Time On Duty:** %s Minutes'):format(pName, dutyStr, os.date("%I:%M:%S %p"), os.date("%I:%M:%S %p", onDutyTimes[cid].time), onDutyTime)
+        local logMessage = ('**Player:** %s \n**Status:** %s \n**Off Duty Time:** %s \n**On Duty Time:** %s \n**Total Time On Duty:** %s Minutes'):format(pName, 'Off Duty', os.date("%I:%M:%S %p"), os.date("%I:%M:%S %p", onDutyTimes[cid].time), onDutyTime)
         sendDutyLog(onDutyTimes[cid].job, logMessage)
+
         onDutyTimes[cid] = nil
     end
 end)

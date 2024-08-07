@@ -1,31 +1,5 @@
-local config = require 'configs.client'
-local playerState = LocalPlayer.state
-
--- Checks if Players has Allowed Group / Job --
-function allowedJobCheck()
-    local callback = nil
-    local playerJob = getCharJob()
-
-    if type(playerJob) == 'table' then
-        for _, allowedJob in pairs(config.AllowedJobs) do
-            for jobName in pairs(playerJob) do
-                if allowedJob == jobName then
-                    callback = jobName
-                    break
-                end
-            end
-        end
-    else
-        for _, allowedJob in pairs(config.AllowedJobs) do
-            if allowedJob == playerJob then
-                callback = playerJob
-                break
-            end
-        end
-    end
-
-    return callback
-end
+local config        = require 'configs.client'
+local playerState   = LocalPlayer.state
 
 -- Toggle Player Duty --
 local function toggleDuty(job)
@@ -36,7 +10,7 @@ local function toggleDuty(job)
     lib.notify({ title = dutyStr, type = 'info' })
 
     local dutyInfo = { job = job, state = newState }
-    local sendLog = lib.callback.await('xt-jobduty:server:logDutyChange', false, dutyInfo)
+    local sendLog = lib.callback.await('xt-duty:server:logDutyChange', false, dutyInfo)
 end exports('toggleDuty', toggleDuty)
 
 -- Set State on Load / Start --
@@ -55,7 +29,7 @@ local function initDutyState()
     playerState:set('onDuty', setState, true)
 
     local dutyInfo = { job = hasAllowedJob, state = setState }
-    local sendLog = lib.callback.await('xt-jobduty:server:logDutyChange', false, dutyInfo)
+    local sendLog = lib.callback.await('xt-duty:server:logDutyChange', false, dutyInfo)
     lib.print.info('Get Duty Statuts', getDutyStr(playerState.onDuty))
 end
 

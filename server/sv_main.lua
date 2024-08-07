@@ -13,11 +13,12 @@ function sendDutyLog(job, message)
 end
 
 -- Gets Employees w/ Specified Job --
-lib.callback.register('xt-jobduty:server:getActiveEmployees', function(source, job)
+lib.callback.register('xt-duty:server:getActiveEmployees', function(source, job)
     local employees = {}
     local allPlayers = GetPlayers()
 
-    for playerSource, _ in ipairs(allPlayers) do
+    for _, playerSource in pairs(allPlayers) do
+        playerSource = tonumber(playerSource)
         if hasGroup(playerSource, job) then
             local state = Player(playerSource).state
             local pName = getCharName(playerSource)
@@ -44,7 +45,7 @@ lib.callback.register('xt-jobduty:server:getActiveEmployees', function(source, j
 end)
 
 -- Logs Duty Change --
-lib.callback.register('xt-jobduty:server:logDutyChange', function(source, info)
+lib.callback.register('xt-duty:server:logDutyChange', function(source, info)
     local job, state = info.job, info.state
     local pName = getCharName(source)
     local cid = getCharID(source)
@@ -62,6 +63,8 @@ lib.callback.register('xt-jobduty:server:logDutyChange', function(source, info)
     end
 
     sendDutyLog(job, logMessage)
+
+    handleBridgeDutyChange(source, state)
 
     return true
 end)

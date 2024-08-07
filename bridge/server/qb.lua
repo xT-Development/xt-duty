@@ -36,3 +36,8 @@ function hasGroup(src, group)
 
     return callback
 end
+
+function handleBridgeDutyChange(src, state)
+    local player = getPlayer(src)
+    return player and player.Functions.SetJobDuty(state == 1) or false
+end

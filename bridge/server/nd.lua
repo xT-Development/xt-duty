@@ -38,3 +38,7 @@ function hasGroup(src, group)
 
     return callback
 end
+
+function handleBridgeDutyChange(src, state)
+    return true
+end

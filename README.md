@@ -1,6 +1,6 @@
 <div align="center">
   <h1>xt-duty</h1>
-  <a href="https://dsc.gg/xtdev"> <img align="center" src="https://user-images.githubusercontent.com/101474430/233859688-2b3b9ecc-41c8-41a6-b2e3-a9f1aad473ee.gif"/></a><br>
+  <a href="https://dsc.gg/xtdev"> <img align="center" src="https://github.com/xT-Development/.github/assets/101474430/d2fbd286-a0d5-4056-95cd-22cb3f526283" /></a>
 </div>
 
 # Features
@@ -19,3 +19,5 @@
 - ox_lib
 
 # [Docs](https://xtdev.gitbook.io/xt-docs/free-resources/duty-menu)
+# [Preview](https://streamable.com/py5jw8)
+# [Logs Preview](https://github.com/user-attachments/assets/c4cb9db1-8fe7-4893-ada1-083badd6520a)

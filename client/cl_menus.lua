@@ -2,8 +2,11 @@ local lib           = lib
 local playerState   = LocalPlayer.state
 
 -- Other Employees Menu --
-local function otherEmployees(job)
-    local activeEmployees = lib.callback.await('xt-duty:server:getActiveEmployees', false, job)
+local function otherEmployees()
+    local playerJob = allowedJobCheck()
+    if not playerJob then return end
+
+    local activeEmployees = lib.callback.await('xt-duty:server:getActiveEmployees', false, playerJob)
     local menuOptions = {}
 
     if activeEmployees and activeEmployees[1] then
@@ -53,7 +56,7 @@ local function refreshDutyMenu()
 end
 
 -- Main Duty Menu --
-local function dutyMenu(hasAllowedJob)
+local function dutyMenu()
     local dutyStr = getDutyStr(playerState.onDuty)
     local dutyIcon = getDutyIcon(playerState.onDuty)
     local dutyIconColor = getDutyIconColor(playerState.onDuty)
@@ -64,7 +67,7 @@ local function dutyMenu(hasAllowedJob)
         position = 'top-right',
         onCheck = function(selected, checked, args)
             if selected == 1 then
-                exports['xt-duty']:toggleDuty(hasAllowedJob)
+                exports['xt-duty']:toggleDuty()
                 refreshDutyMenu()
             end
         end,
@@ -74,15 +77,11 @@ local function dutyMenu(hasAllowedJob)
         }
     }, function(selected, scrollIndex, args)
         if selected == 2 then
-            otherEmployees(hasAllowedJob)
+            otherEmployees()
         end
     end)
     lib.showMenu('duty_menu')
 end
 
 -- Open Duty Menu --
-RegisterCommand('duty', function()
-    local hasAllowedJob = allowedJobCheck()
-    if not hasAllowedJob then return end
-    dutyMenu(hasAllowedJob)
-end)
+RegisterCommand('duty', dutyMenu)

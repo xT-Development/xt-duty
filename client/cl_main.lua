@@ -1,16 +1,38 @@
 local config        = require 'configs.client'
 local playerState   = LocalPlayer.state
+local renewed_lib   = (GetResourceState('Renewed-Lib') == 'started')
 
--- Toggle Player Duty --
-local function toggleDuty(job)
-    local newState = (playerState.onDuty == 0) and 1 or 0
-    local dutyStr = getDutyStr(newState)
-    playerState:set('onDuty', newState, true)
+-- Set Player Duty --
+local function setDuty(state)
+    local playerJob = allowedJobCheck()
+    if not playerJob then return end
 
+    local setState = state
+    if type(state) == 'boolean' then
+        setState = state and 1 or 0
+    end
+
+    playerState:set('onDuty', setState, true)
+
+    if renewed_lib then
+        playerState:set('renewed_service', (setState == 1) and playerJob or false, true)
+    end
+
+    local dutyStr = getDutyStr(setState)
     lib.notify({ title = dutyStr, type = 'info' })
 
-    local dutyInfo = { job = job, state = newState }
+    local dutyInfo = { job = playerJob, state = state }
     local sendLog = lib.callback.await('xt-duty:server:logDutyChange', false, dutyInfo)
+end exports('setDuty', setDuty)
+
+-- Toggle Player Duty --
+local function toggleDuty()
+    local playerJob = allowedJobCheck()
+    if not playerJob then return end
+
+    local newState = (playerState.onDuty == 0) and 1 or 0
+
+    setDuty(newState)
 end exports('toggleDuty', toggleDuty)
 
 -- Set State on Load / Start --
@@ -20,16 +42,18 @@ local function initDutyState()
     local hasAllowedJob = allowedJobCheck()
     if not hasAllowedJob then
         playerState:set('onDuty', 0, true)
+        if renewed_lib then
+            playerState:set('renewed_service', false, true)
+        end
         return
     end
 
     local cid = getCharId()
     local kvpStr = ('onDuty-%s'):format(cid)
     local setState = GetResourceKvpInt(kvpStr) or 0
-    playerState:set('onDuty', setState, true)
 
-    local dutyInfo = { job = hasAllowedJob, state = setState }
-    local sendLog = lib.callback.await('xt-duty:server:logDutyChange', false, dutyInfo)
+    setDuty(setState)
+
     lib.print.info('Get Duty Statuts', getDutyStr(playerState.onDuty))
 end
 

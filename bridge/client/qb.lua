@@ -1,18 +1,19 @@
 if GetResourceState('qb-core') ~= 'started' then return end
 
 local QBCore = exports['qb-core']:GetCoreObject()
-local PlayerData = {}
+
+function playerData()
+    return QBCore.Functions.GetPlayerData()
+end
 
 function getCharId()
+    local PlayerData = playerData()
     return PlayerData.citizenid
 end
 
 function getCharJob()
+    local PlayerData = playerData()
     return PlayerData.job.name
-end
-
-function initPlayerData()
-    PlayerData = QBCore.Functions.GetPlayerData()
 end
 
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()

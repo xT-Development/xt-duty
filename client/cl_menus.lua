@@ -57,6 +57,9 @@ end
 
 -- Main Duty Menu --
 local function dutyMenu()
+    local playerJob = allowedJobCheck()
+    if not playerJob then return end
+
     local dutyStr = getDutyStr(playerState.onDuty)
     local dutyIcon = getDutyIcon(playerState.onDuty)
     local dutyIconColor = getDutyIconColor(playerState.onDuty)

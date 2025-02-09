@@ -1,6 +1,5 @@
 local config        = require 'configs.client'
 local playerState   = LocalPlayer.state
-local renewed_lib   = (GetResourceState('Renewed-Lib') == 'started')
 
 -- Set Player Duty --
 local function setDuty(state)
@@ -12,17 +11,12 @@ local function setDuty(state)
         setState = state and 1 or 0
     end
 
-    playerState:set('onDuty', setState, true)
-
-    if renewed_lib then
-        playerState:set('renewed_service', (setState == 1) and playerJob or false, true)
-    end
+    local dutyInfo = { job = playerJob, state = setState }
+    local isSet = lib.callback.await('xt-duty:server:setDuty', false, dutyInfo)
+    if not isSet then return end
 
     local dutyStr = getDutyStr(setState)
     lib.notify({ title = dutyStr, type = 'info' })
-
-    local dutyInfo = { job = playerJob, state = state }
-    local sendLog = lib.callback.await('xt-duty:server:logDutyChange', false, dutyInfo)
 end exports('setDuty', setDuty)
 
 -- Toggle Player Duty --
@@ -37,8 +31,6 @@ end exports('toggleDuty', toggleDuty)
 
 -- Set State on Load / Start --
 local function initDutyState()
-    initPlayerData()
-
     local hasAllowedJob = allowedJobCheck()
     if not hasAllowedJob then
         playerState:set('onDuty', 0, true)

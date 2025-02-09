@@ -1,14 +1,31 @@
-local svConfig = require 'configs.server'
+local svConfig      = require 'configs.server'
+local renewed_lib   = (GetResourceState('Renewed-Lib') == 'started')
 local onDutyTimes = {}
 
 function getDutyStr(state)
-    return (state == 1) and 'On Duty' or ' Off Duty'
+    return ((state == 1) or state) and 'On Duty' or ' Off Duty'
 end
 
-function sendDutyLog(job, message)
+function sendDutyLog(source, job, state)
+    local cid = getCharID(source)
+    local pName = getCharName(source)
+    local dutyStr = getDutyStr(state)
+
+    local logMessage = ''
+    if state == 1 then
+        logMessage = ('**Player:** %s \n**Status:** %s \n**On Duty Time:** %s'):format(pName, dutyStr, os.date("%I:%M:%S %p"))
+        onDutyTimes[cid] = { job = job, time = os.time() }
+    elseif state == 0 then
+        if not onDutyTimes[cid] then return true end
+
+        local onDutyTime = ('%.2f'):format(os.difftime(os.time(), onDutyTimes[cid].time) / 60)
+        logMessage = ('**Player:** %s \n**Status:** %s \n**Off Duty Time:** %s \n**On Duty Time:** %s \n**Total Time On Duty:** %s Minutes'):format(pName, dutyStr, os.date("%I:%M:%S %p"), os.date("%I:%M:%S %p", onDutyTimes[cid].time), onDutyTime)
+        onDutyTimes[cid] = nil
+    end
+
     local Webhook = svConfig.Webhooks[job] and svConfig.Webhooks[job].Webhook or svConfig.Webhooks['default'].Webhook
     local WebhookTitle = svConfig.Webhooks[job] and svConfig.Webhooks[job].Title or svConfig.Webhooks['default'].Title
-    local embed = { { ['title'] = WebhookTitle, ['description'] = message } }
+    local embed = { { ['title'] = WebhookTitle, ['description'] = logMessage } }
     PerformHttpRequest(Webhook, function() end, 'POST', json.encode({ username = 'Logs', embeds = embed }), { ['Content-Type'] = 'application/json' })
 end
 
@@ -44,27 +61,23 @@ lib.callback.register('xt-duty:server:getActiveEmployees', function(source, job)
     return employees
 end)
 
--- Logs Duty Change --
-lib.callback.register('xt-duty:server:logDutyChange', function(source, info)
-    local job, state = info.job, info.state
-    local pName = getCharName(source)
-    local cid = getCharID(source)
-    local dutyStr = getDutyStr(state)
-    local logMessage = ''
-    if state == 1 then
-        logMessage = ('**Player:** %s \n**Status:** %s \n**On Duty Time:** %s'):format(pName, dutyStr, os.date("%I:%M:%S %p"))
-        onDutyTimes[cid] = { job = job, time = os.time() }
-    elseif state == 0 then
-        if not onDutyTimes[cid] then return true end
-
-        local onDutyTime = ('%.2f'):format(os.difftime(os.time(), onDutyTimes[cid].time) / 60)
-        logMessage = ('**Player:** %s \n**Status:** %s \n**Off Duty Time:** %s \n**On Duty Time:** %s \n**Total Time On Duty:** %s Minutes'):format(pName, dutyStr, os.date("%I:%M:%S %p"), os.date("%I:%M:%S %p", onDutyTimes[cid].time), onDutyTime)
-        onDutyTimes[cid] = nil
+-- Handles Statebag Change & Logging --
+lib.callback.register('xt-duty:server:setDuty', function(source, dutyInfo)
+    if dutyInfo and not dutyInfo.job or not dutyInfo.state then
+        return false
     end
 
-    sendDutyLog(job, logMessage)
+    local playerJob, setState = dutyInfo.job, dutyInfo.state
+    local playerState = Player(source).state
 
-    handleBridgeDutyChange(source, state)
+    playerState:set('onDuty', setState, true)
+
+    if renewed_lib then -- Renewed-Lib compat
+        playerState:set('renewed_service', (setState == 1) and playerJob or false, true)
+    end
+
+    sendDutyLog(source, playerJob, setState) -- Send log
+    handleBridgeDutyChange(source, setState) -- Update bridge
 
     return true
 end)
